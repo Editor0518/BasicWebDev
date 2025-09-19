@@ -7,13 +7,56 @@
     <script>
         // TODO: Add hello code
         // TODO: Add setTimeout code
+    
+        let num=0;
         
         setTimeout( 
-            () => {document.write('...Hello again!');
+            () => {document.write('...Hello again!<br>');
         }, 2000);
+
+        function introduce() {
+            if(num==0) {
+                step1();
+            } else if(num==1) {
+                printTime();
+            } else if(num==2) {
+                step2();
+                printTime();
+            } else if(num==3) {
+                step3();
+                printTime();
+            }
+            else{
+                printTime();
+                document.write('...끝!!!');
+                clearInterval(tId);
+            }
+            ++num;
+        }
+
+        function step1(){
+            document.write(`<h2>1. 브랜치 생성 (feature/week3) 후 작업</h2>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;a. string 표기를 템플릿 리터널 방식으로 변경 해보기<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;b. setInterval 사용해보기<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;c.함수를 여러개 만들고, 3초마다 다른 함수가 업데이트되는 자기소개글 만들어보기<br>
+                    </p>`);
+        }
+        function step2(){
+            document.write(`<h2>2. feature/week3 브랜치에 커밋, 푸쉬</h2>`);
+        }
+        function step3(){
+            document.write(`<h2>3. main 브랜치에 머지</h2>`);
+        }
+        function printTime(){
+            document.write(`현재 ${num*3} 초가 지났습니다!!!<br>`);
+        }
+
+        const tId = setInterval(introduce, 3000);
 
     </script>
  </body>
  </html>
+
+
 
  
