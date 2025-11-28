@@ -17,6 +17,8 @@ const Messages = {
 let heroImg, 
   enemyImg, 
   laserImg,
+  supportLaserImg,
+  explosionImg,
   canvas, ctx, 
   gameObjects = [], 
   hero, 
@@ -124,22 +126,61 @@ class Enemy extends GameObject {
 
 // 레이저 클래스
 class Laser extends GameObject {
-  constructor(x, y) {
-    super(x,y);
-    this.width = 9;
-    this.height = 33;
-    this.type = 'Laser';
-    this.img = laserImg;
-    
+  // 수정: 레이저는 이미지, 크기, 속도를 인자로 받을 수 있게 변경
+  constructor(x, y, opts = {}) {
+    super(x, y);
+    this.width = opts.width || 9;
+    this.height = opts.height || 33;
+    this.type = opts.type || 'Laser';
+    this.img = opts.img || laserImg;
+    this.speed = opts.speed || 15;
+
     // 레이저 자동 이동 및 제거 로직
     let id = setInterval(() => {
-      if (this.y > 0) {
-        this.y -= 15; // 위로 이동
+      if (this.y > -this.height) {
+        this.y -= this.speed; // 위로 이동
       } else {
         this.dead = true;
         clearInterval(id);
       }
-    }, 100)
+    }, opts.interval || 100);
+  }
+}
+
+// 보조 우주선 클래스 (영웅을 따라다님)
+class Support extends GameObject {
+  constructor(parent, offsetX) {
+    super(parent.x + offsetX, parent.y);
+    this.parent = parent;
+    this.offsetX = offsetX;
+    this.width = Math.floor(parent.width * 0.6);
+    this.height = Math.floor(parent.height * 0.6);
+    this.type = 'Support';
+    this.img = parent.img; // 플레이어 이미지 그대로 사용 (축소)
+  }
+  update() {
+    // 부모 영웅의 위치를 기준으로 항상 갱신
+    this.x = this.parent.x + this.offsetX;
+    this.y = this.parent.y + (this.parent.height - this.height);
+  }
+  fire() {
+    // 서포트 전용 작은 레이저 발사
+    const lx = this.x + this.width / 2 - 3;
+    const ly = this.y - 8;
+    gameObjects.push(new Laser(lx, ly, { img: supportLaserImg, width: 6, height: 20, speed: 10, interval: 80, type: 'Laser' }));
+  }
+}
+
+// 폭발 이펙트 클래스
+class Explosion extends GameObject {
+  constructor(x, y, width, height, img, ttl = 400) {
+    super(x, y);
+    this.width = width;
+    this.height = height;
+    this.img = img;
+    this.type = 'Explosion';
+    // 일정 시간 후 제거
+    setTimeout(() => { this.dead = true; }, ttl);
   }
 }
 
@@ -155,7 +196,11 @@ class Hero extends GameObject {
   fire() {
     if (this.canFire()) { // 쿨다운 확인
       // 영웅의 중앙에서 레이저 발사
-      gameObjects.push(new Laser(this.x + this.width / 2 - 4.5, this.y - 10)); 
+      gameObjects.push(new Laser(this.x + this.width / 2 - 4.5, this.y - 10, { img: laserImg, width: 9, height: 33, speed: 15 })); 
+      // 보조 우주선이 있으면 함께 발사
+      if (this.supports && Array.isArray(this.supports)) {
+        this.supports.forEach(s => s.fire());
+      }
       this.cooldown = 500; // 쿨다운 500ms 설정
       let id = setInterval(() => {
         if (this.cooldown > 0) {
@@ -215,6 +260,14 @@ function createHero() {
   );
   hero.img = heroImg;
   gameObjects.push(hero);
+
+  // 서포트(보조 우주선) 2기 추가: 좌우에 배치
+  const supportOffset = 70; // 영웅 기준 X 오프셋
+  const supportLeft = new Support(hero, -supportOffset);
+  const supportRight = new Support(hero, supportOffset + 42);
+  // 지원 우주선이 플레이어 발사 시 자동 발사할 수 있도록 hero.supports에 연결
+  hero.supports = [supportLeft, supportRight];
+  gameObjects.push(supportLeft, supportRight);
 }
 
 // 게임 초기화
@@ -234,7 +287,11 @@ function initGame() {
   
   // 충돌 이벤트 리스너 등록
   eventEmitter.on(Messages.COLLISION_ENEMY_LASER, (_, { first, second }) => {
+    // 레이저와 적 제거 대신 폭발 이펙트를 생성
     first.dead = true; // 레이저 제거
+    // 적의 중앙에 폭발을 생성
+    const ex = new Explosion(second.x, second.y, second.width, second.height, explosionImg, 600);
+    gameObjects.push(ex);
     second.dead = true; // 적 제거
   });
 }
@@ -314,6 +371,8 @@ window.onload = async () => {
   heroImg = await loadTexture("assets/player.png");
   enemyImg = await loadTexture("assets/enemyShip.png");
   laserImg = await loadTexture("assets/laserRed.png");
+  supportLaserImg = await loadTexture('assets/laserRed.png');
+  explosionImg = await loadTexture('assets/laserGreenShot.png');
   backgroundImage = await loadTexture('assets/Background/starBackground.png'); // 배경 이미지 로드
 
   // createPattern을 사용하여 4x4 타일 배경 생성
@@ -337,7 +396,9 @@ window.onload = async () => {
     }
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // 2. 게임 객체 그리기
+    // 2. 게임 객체 업데이트 및 그리기
+    // 각 객체의 update 메서드가 있으면 호출
+    gameObjects.forEach(go => { if (typeof go.update === 'function') go.update(); });
     drawGameObjects(ctx);
     
     // 3. 상태 업데이트 및 충돌 감지
