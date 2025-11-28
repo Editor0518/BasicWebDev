@@ -157,11 +157,23 @@ class Support extends GameObject {
     this.height = Math.floor(parent.height * 0.6);
     this.type = 'Support';
     this.img = parent.img; // 플레이어 이미지 그대로 사용 (축소)
+    // 자동 발사 타이머 (스페이스바 없이 주기적으로 발사)
+    this.autoFireInterval = 800; // ms
+    this.autoFireId = setInterval(() => {
+      if (!this.dead && !this.parent.dead) {
+        this.fire();
+      }
+    }, this.autoFireInterval);
   }
   update() {
     // 부모 영웅의 위치를 기준으로 항상 갱신
     this.x = this.parent.x + this.offsetX;
     this.y = this.parent.y + (this.parent.height - this.height);
+    // 자동 발사 객체가 제거되면 타이머 해제
+    if (this.dead && this.autoFireId) {
+      clearInterval(this.autoFireId);
+      this.autoFireId = null;
+    }
   }
   fire() {
     // 서포트 전용 작은 레이저 발사
@@ -198,9 +210,9 @@ class Hero extends GameObject {
       // 영웅의 중앙에서 레이저 발사
       gameObjects.push(new Laser(this.x + this.width / 2 - 4.5, this.y - 10, { img: laserImg, width: 9, height: 33, speed: 15 })); 
       // 보조 우주선이 있으면 함께 발사
-      if (this.supports && Array.isArray(this.supports)) {
-        this.supports.forEach(s => s.fire());
-      }
+      //if (this.supports && Array.isArray(this.supports)) {
+      //  this.supports.forEach(s => s.fire());
+      //}
       this.cooldown = 500; // 쿨다운 500ms 설정
       let id = setInterval(() => {
         if (this.cooldown > 0) {
@@ -272,15 +284,21 @@ function createHero() {
 
 // 게임 초기화
 function initGame() {
+  // 기존 서포트 타이머 정리(새 게임 시작 시 중복 발사 방지)
+  gameObjects.forEach(go => {
+    if (go && go.autoFireId) {
+      clearInterval(go.autoFireId);
+    }
+  });
   gameObjects = [];
   createEnemies();
   createHero();
   
   // 키 이벤트 리스너 등록
-  eventEmitter.on(Messages.KEY_EVENT_UP, () => { hero.y -=5 ; });
-  eventEmitter.on(Messages.KEY_EVENT_DOWN, () => { hero.y += 5; });
-  eventEmitter.on(Messages.KEY_EVENT_LEFT, () => { hero.x -= 5; });
-  eventEmitter.on(Messages.KEY_EVENT_RIGHT, () => { hero.x += 5; });
+  eventEmitter.on(Messages.KEY_EVENT_UP, () => { hero.y -=10 ; });
+  eventEmitter.on(Messages.KEY_EVENT_DOWN, () => { hero.y += 10; });
+  eventEmitter.on(Messages.KEY_EVENT_LEFT, () => { hero.x -= 10; });
+  eventEmitter.on(Messages.KEY_EVENT_RIGHT, () => { hero.x += 10; });
   eventEmitter.on(Messages.KEY_EVENT_SPACE, () => {
     if (hero.canFire()) { hero.fire(); }
   });
