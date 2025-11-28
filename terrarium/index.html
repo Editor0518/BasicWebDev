@@ -8,8 +8,9 @@
     <link rel="stylesheet" href="../terrarium/style.css"><!--path는 ../이어야 함-->
     
 </head>
-<body>
+<body id="body">
     <h1>My Terrarium</h1>
+    <p class="guide">You can drag and drop your own images into the terrarium...</p>
      <div id="page">
         <div id="left-container" class="container">
             <div class="plant-holder">
@@ -57,7 +58,7 @@
                 <img class="plant" alt="plant" id="plant14" src="./images/plant14.png" />
             </div>
         </div>
- </div>
+    </div>
 
     <div id="terrarium-container">
         <div class="jar-top"></div>
@@ -68,7 +69,10 @@
         <div class="dirt"></div>
         <div class="jar-bottom"></div>
     </div>
-
+    <div id="trash-can">
+    🗑️
+    </div>
+    <button id="reset-button">Reset</button>
     <script src="../terrarium/closure.js"></script>
 </body>
 </html>

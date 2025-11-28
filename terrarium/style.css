@@ -1,10 +1,16 @@
 h1{
-    color:blue;
+    margin-top:20px;
+    color:rgb(25, 90, 71);
     text-align: center;
 }
 body {
     font-family: helvetica, arial, sans-serif;
 }
+
+.guide{
+    text-align: center;
+}
+
 #left-container {
     left: 0px;
 }
@@ -101,11 +107,13 @@ body {
 #jar-glossy-long {
     height: 20%;
     bottom: 19%;
+    left: 5%; 
 }
  
 #jar-glossy-short {
     height: 5%;
     bottom: 43%;
+    left: 10%;
 }
 
 .jar-glossy {
@@ -116,9 +124,29 @@ body {
     left: 5%;
     opacity: 0.5;
 }
-/*
-테라리움 js를 작업하기 전 테라리움을 마음껏 꾸며보세요.
- 2. 화면 사이즈 변경 시 깨지는 레이아웃을 바로잡아 보세요.
- jar-glossy-long, jar-glossy-short 마크업은 있지만, CSS는 없는 
-상태입니다. 완성해보세요.
-*/
+
+#trash-can {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px;
+    background-color: #ffe0e0;
+    border: 1px solid #ff5555;
+    border-radius: 5px;
+    font-size: 24px;
+    cursor: default;
+    z-index: 1000;
+}
+
+#reset-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    padding: 10px 15px;
+    background-color: #d1e1df;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    z-index: 1000;
+}

@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <title> Typing game </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/11234129e4.js" crossorigin="anonymous"></script>
+
+    </head>
+    <body>
+        <h1 class="title">Typing game!</h1>
+        
+        <p id="info">
+            <i class="fa-solid fa-keyboard"></i>
+            Practice your typing skills with a quote from Sherlock Holmes.
+        </p>
+        <p id="start-info">Click <b>start</b> to begin!</p>
+        <p id="time"></p>
+        <p id="quote" class="georgia-font"></p>
+        <p id="message"></p>
+        <div>
+        <input type="text" aria-label="current word" id="typed-value" />
+        <button type="button" id="start">
+            Start
+        </button>
+    </div>
+    <script src="script.js"></script><div id="result-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>타이핑 결과</h2>
+        <p id="modal-time-result">소요 시간: </p>
+        <p id="modal-best-time">최고 기록: </p>
+        <button type="button" id="modal-start-button">다시 시작</button>
+            </div>
+    </div>
+</body>
+</html>
